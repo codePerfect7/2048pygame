@@ -16,7 +16,7 @@ class Game:
         self.cells = []
         self.score = [0,0]
         self.fontEngine = pygame.font.SysFont('Helvetica',45)
-        self.over = False
+        self.over = [False, False]
         self.startGame()
         self.updateTiles()
     
@@ -97,9 +97,9 @@ class Game:
     
     def gameOver(self):
         if any(2048 in row for row in self.matrix):
-            pass # Game over code
+            self.over = [True, True]
         elif not any(0 in row for row in self.matrix) and not self.horMoveExists() and not self.verMoveExists():
-            pass # Game over code
+            self.over = [True, False]
 
     def updateTiles(self):
         for i in range(4):
@@ -115,9 +115,11 @@ class Game:
                     self.cells[i][j]['textSurface'] = None
 
     def scs(self):
+        oldmatrix = self.matrix
         self.stack()
         self.combine()
         self.stack()
+        return oldmatrix
     
     def aug(self):
         self.addNewTile()
@@ -125,27 +127,41 @@ class Game:
         self.gameOver()
     
     def left(self):
-        self.scs()
+        oldmatrix=self.scs()
+        if oldmatrix==self.matrix:
+            return
         self.aug()
     def right(self):
+        oldmatrix = self.matrix
         self.reverse()
         self.scs()
         self.reverse()
+        if oldmatrix == self.matrix:
+            return
         self.aug()
     def up(self):
+        oldmatrix = self.matrix
         self.transpose()
         self.scs()
         self.transpose()
+        if oldmatrix == self.matrix:
+            return
         self.aug()
     def down(self):
+        oldmatrix = self.matrix
         self.transpose()
         self.reverse()
         self.scs()
         self.reverse()
         self.transpose()
+        if oldmatrix == self.matrix:
+            return
         self.aug()
+    
+    def reset(self):
+        self.__init__(self.window)
 
-def draw(window, matrix, cells, score):
+def draw(window, matrix, cells, score, over):
     window.fill(c.GRID_COLOR)
     window.blit(score[1][0], score[1][1])
     scoreSurface = pygame.font.SysFont(c.SCORE_LABEL_FONT[0], 50).render(str(score[0]), True, (0,0,0))
@@ -161,7 +177,16 @@ def draw(window, matrix, cells, score):
                 window.blit(cell['textSurface'], cell['textRect'])
             elif x == 0:
                 pygame.draw.rect(window, c.EMPTY_CELL_COLOR, cell['rect'])
-
+    if over[0] and over[1]:
+        gameOverSurface = pygame.font.SysFont(c.SCORE_LABEL_FONT[0], 45).render('2048 Completed. Ctrl+q to reset', True, (0,0,0))
+        gameOverRect = gameOverSurface.get_rect()
+        gameOverRect.center = (WIDTH // 2, HEIGHT // 2)
+        window.blip(gameOverSurface, gameOverRect)
+    if over[0] and not over[1]:
+        gameOverSurface = pygame.font.SysFont(c.SCORE_LABEL_FONT[0], 45).render('No possible moves. Ctrl+q to reset', True, (0,0,0))
+        gameOverRect = gameOverSurface.get_rect()
+        gameOverRect.center = (WIDTH // 2, HEIGHT // 2)
+        window.blip(gameOverSurface, gameOverRect)
     pygame.display.update()
 
 def main():
@@ -171,7 +196,7 @@ def main():
 
     while running:
         clock.tick(FPS)
-        draw(window, game.matrix, game.cells, game.score)
+        draw(window, game.matrix, game.cells, game.score, game.over)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -186,6 +211,8 @@ def main():
                     game.up()
                 elif event.key == pygame.K_DOWN:
                     game.down()
+                elif event.key == pygame.K_q and pygame.key.get_mods() & pygame.KMOD_CTRL and game.over:
+                    game.reset()
 
     pygame.quit()
 

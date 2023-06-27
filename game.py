@@ -40,6 +40,9 @@ class Game:
             for j in range(4):
                 rect = pygame.Rect(10+j*100, 10+i*100, 80, 80)
                 textRect, textSurface = None, None
+                # For walrus operator fix uncomment the two lines below and comment the third line
+                # x = self.matrix[i-1][j]
+                # if x != 0:
                 if (x:=self.matrix[i-1][j]) != 0:
                     textSurface = self.fontEngine.render(str(x), True, c.CELL_NUMBER_COLORS[x])
                     textRect = textSurface.get_rect()
@@ -91,6 +94,9 @@ class Game:
         ''' Updates self.cells with the new data when something changes it's position on the board '''
         for i in range(4):
             for j in range(4):
+                # For walrus operator fix uncomment the two lines below and comment the third line
+                # x = self.matrix[i][j]
+                # if x != 0:
                 if (x:=self.matrix[i][j]) != 0:
                     textSurface = self.fontEngine.render(str(x), True, c.CELL_NUMBER_COLORS[x])
                     textRect = textSurface.get_rect()
@@ -205,6 +211,9 @@ def draw(window, matrix, cells, score, over):
     for i in range(4):
         for j in range(4):
             cell = cells[i][j]
+            # For walrus operator fix uncomment the two lines below and comment the third line
+            # x = matrix[i][j]
+            # if x != 0:
             if (x:=matrix[i][j]) != 0:
                 pygame.draw.rect(window, c.CELL_COLORS[x], cell['rect'])
                 window.blit(cell['textSurface'], cell['textRect'])
